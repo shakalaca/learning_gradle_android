@@ -1,0 +1,18 @@
+allprojects {
+    apply plugin: 'maven'
+    group = 'com.corner23.android.library'
+}
+
+subprojects {
+    uploadArchives {
+        repositories.mavenDeployer {
+            repository(url: uri("$rootDir/repository"))
+        }
+    }
+}
+
+task deploy(dependsOn: subprojects.uploadArchives) {
+    doLast {
+        println 'Done deployment'
+    }
+}

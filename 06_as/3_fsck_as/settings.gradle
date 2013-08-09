@@ -1,0 +1,7 @@
+include 'ActionBarSherlock'
+include 'UnifiedPreference'
+
+project(':ActionBarSherlock').projectDir = new File(rootDir, 'library/ActionBarSherlock/library')
+project(':UnifiedPreference').projectDir = new File(rootDir, 'library/UnifiedPreference/library')
+
+include 'app'

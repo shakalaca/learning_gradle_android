@@ -1,0 +1,6 @@
+if (hasProperty("useRepo") == false) {
+    include ':library:ActionBarSherlock'
+    include ':library:UnifiedPreference'
+}
+
+include 'app'

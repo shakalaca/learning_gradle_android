@@ -1,0 +1,104 @@
+apply plugin: 'android'
+
+archivesBaseName = "demo"
+
+dependencies {
+    compile 'com.android.support:support-v4:13.0.0'
+    compile project(':library:ActionBarSherlock:library')
+    compile project(':library:UnifiedPreference:library')
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "17.0.0"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 17
+        versionName '1.0.1'
+        packageName = 'com.corner23.android.demo'
+    }
+
+    productFlavors {
+        rock
+        amazonFree {
+            packageName = 'com.corner23.android.amazon.free'
+        }
+        playFree {
+            packageName = 'com.corner23.android.playstore.free'
+        }
+    }
+
+    signingConfigs {
+        release {
+            if (project.hasProperty('demoKeyAlias') && 
+                project.hasProperty('demoStoreFile') &&
+                project.hasProperty('demoStorePassword') &&
+                project.hasProperty('demoKeyPassword')) {
+                keyAlias = demoKeyAlias
+                storeFile = file(demoStoreFile)
+                storePassword = demoStorePassword
+                keyPassword = demoKeyPassword
+            } else {
+                signingConfig = null
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            packageNameSuffix ".debug"
+            versionNameSuffix "-SNAPSHOT"
+        }
+
+        release {
+            signingConfig signingConfigs.release
+
+            runProguard true
+            proguardFile getDefaultProguardFile('proguard-android.txt')
+        }
+    }
+}
+
+// get hash of current commit
+new ByteArrayOutputStream().withStream { os -> 
+    def result = exec {
+        executable = 'git'
+        args = ['rev-parse', '--short', 'HEAD']
+        standardOutput = os
+    }
+    
+    project.ext.gitHash = os.toString().trim();
+}
+
+android.applicationVariants.all { variant ->
+    // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
+    def versionSuffix = variant.buildType.versionNameSuffix ? variant.buildType.versionNameSuffix : ""
+    def versionName = variant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
+    def apk = variant.outputFile;
+    def newName = apk.name.replace(variant.buildType.name, versionName);
+
+    variant.outputFile = new File(apk.parentFile, newName);
+
+    // launch after install
+    variant.install.doLast {
+        def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
+        def packageName = variant.productFlavors.packageName[0] ? variant.productFlavors.packageName[0] : android.defaultConfig.packageName
+        def startupClass = packageName + packageSuffix + '/com.corner23.android.demo.MainActivity'
+        def result = exec {
+            executable = 'adb'
+            args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
+        }
+    }
+}
+
+assembleRelease.doLast {
+    tasks.moveApk.execute()
+}
+
+task moveApk(type: Copy) {
+    description "Move the final apk in <root>/out/appname.apk"
+
+    from (projectDir, 'build/apk') { include '*.apk' }
+    into new File(rootProject.projectDir, 'out/')
+}

@@ -1,0 +1,3 @@
+include 'ActionBarSherlock'
+
+project(':ActionBarSherlock').projectDir = new File('../ActionBarSherlock/library')
