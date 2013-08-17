@@ -7,7 +7,30 @@ subprojects {
     uploadArchives {
         repositories.mavenDeployer {
             repository(url: uri("$rootDir/repository"))
+
+            addFilter('aar') { artifact, file ->
+                artifact.name == archivesBaseName
+            }
+            addFilter('apklib') { artifact, file ->
+                artifact.name == archivesBaseName + '-apklib'
+            }
         }
+    }
+
+    task apklib(type: Zip) {
+        appendix = extension = 'apklib'
+
+        from 'AndroidManifest.xml'
+        into('res') {
+            from 'res'
+        }
+        into('src') {
+            from 'src'
+        }
+    }
+
+    artifacts {
+        archives apklib
     }
 }
 
