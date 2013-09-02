@@ -72,13 +72,7 @@ new ByteArrayOutputStream().withStream { os ->
 }
 
 android.applicationVariants.all { variant ->
-    // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
-    def versionSuffix = variant.buildType.versionNameSuffix ? variant.buildType.versionNameSuffix : ""
-    def versionName = variant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
-    def apk = variant.outputFile;
-    def newName = apk.name.replace(variant.buildType.name, versionName);
-
-    variant.outputFile = new File(apk.parentFile, newName);
+    renameAPK(variant)
 
     // launch after install
     variant.install.doLast {
@@ -90,6 +84,22 @@ android.applicationVariants.all { variant ->
             args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
         }
     }
+}
+
+def renameAPK(targetVariant) {
+    // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
+    def versionSuffix = targetVariant.buildType.versionNameSuffix ? targetVariant.buildType.versionNameSuffix : ""
+    def versionName = targetVariant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
+    
+    if (targetVariant.zipAlign) {
+        def apkFinal = targetVariant.outputFile;
+        def newName = apkFinal.name.replace(targetVariant.buildType.name, versionName);
+        targetVariant.outputFile = new File(apkFinal.parentFile, newName);
+    }
+
+    def apkProcess = targetVariant.packageApplication.outputFile;
+    targetVariant.packageApplication.outputFile = 
+        new File(apkProcess.parentFile, apkProcess.name.replace(targetVariant.buildType.name, versionName));
 }
 
 assembleRelease.doLast {
