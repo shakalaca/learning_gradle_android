@@ -109,6 +109,7 @@ assembleRelease.doLast {
 task moveApk(type: Copy) {
     description "Move the final apk in <root>/out/appname.apk"
 
-    from (projectDir, 'build/apk') { include '*.apk' }
-    into new File(rootProject.projectDir, 'out/')
+    from "$projectDir/build/apk"
+    into "$rootProject.projectDir/out"
+    include '*.apk'
 }
