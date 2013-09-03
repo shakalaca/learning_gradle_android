@@ -22,16 +22,16 @@ android {
     productFlavors {
         rock
         amazonFree {
-            packageName = 'com.corner23.android.amazon.free'
+            packageName = 'com.corner23.android.demo.amazon.free'
         }
         amazonPaid {
-            packageName = 'com.corner23.android.amazon.paid'
+            packageName = 'com.corner23.android.demo.amazon.paid'
         }
         playFree {
-            packageName = 'com.corner23.android.playstore.free'
+            packageName = 'com.corner23.android.demo.play.free'
         }
         playPaid {
-            packageName = 'com.corner23.android.playstore.paid'
+            packageName = 'com.corner23.android.demo.play.paid'
         }
     }
 
@@ -67,6 +67,19 @@ android {
 }
 
 android.applicationVariants.all { variant ->
+    variant.mergeResources.doFirst {
+        if (variant.name.startsWith("AmazonPaid")) {
+            android.sourceSets.debug.res.srcDirs = ['src/amazonPaidDebug/res']
+            android.sourceSets.release.res.srcDirs = ['src/amazonPaidRelease/res']
+        } else if (variant.name.startsWith("AmazonFree")) {
+            android.sourceSets.debug.res.srcDirs = ['src/amazonFreeDebug/res']
+            android.sourceSets.release.res.srcDirs = ['src/amazonFreeRelease/res']
+        } else {
+            android.sourceSets.debug.res.srcDirs = ['src/debug/res']
+            android.sourceSets.release.res.srcDirs = ['src/release/res']
+        }
+    }
+
     // launch after install
     variant.install.doLast {
         def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
