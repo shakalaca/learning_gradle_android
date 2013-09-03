@@ -60,20 +60,7 @@ android {
     }
 }
 
-// get hash of current commit
-new ByteArrayOutputStream().withStream { os -> 
-    def result = exec {
-        executable = 'git'
-        args = ['rev-parse', '--short', 'HEAD']
-        standardOutput = os
-    }
-    
-    project.ext.gitHash = os.toString().trim();
-}
-
 android.applicationVariants.all { variant ->
-    renameAPK(variant)
-
     // launch after install
     variant.install.doLast {
         def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
@@ -84,32 +71,43 @@ android.applicationVariants.all { variant ->
             args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
         }
     }
+
+    variant.assemble.doLast {
+        rename_and_moveout_apk(variant)
+    }
 }
 
-def renameAPK(targetVariant) {
+def rename_and_moveout_apk(targetVariant) {
+    // get hash of current commit
+    new ByteArrayOutputStream().withStream { os -> 
+        def result = exec {
+            executable = 'git'
+            args = ['rev-parse', '--short', 'HEAD']
+            standardOutput = os
+        }
+        
+        project.ext.gitHash = os.toString().trim();
+    }
+
     // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
     def versionSuffix = targetVariant.buildType.versionNameSuffix ? targetVariant.buildType.versionNameSuffix : ""
     def versionName = targetVariant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
     
     if (targetVariant.zipAlign) {
         def apkFinal = targetVariant.outputFile;
-        def newName = apkFinal.name.replace(targetVariant.buildType.name, versionName);
-        targetVariant.outputFile = new File(apkFinal.parentFile, newName);
+        def apkFinalNewName = apkFinal.name.replace(targetVariant.buildType.name, versionName);
+        copy {
+            from "$apkFinal"
+            into "$rootProject.projectDir/out"
+            rename ("$apkFinal.name", "$apkFinalNewName")
+        }
     }
 
     def apkProcess = targetVariant.packageApplication.outputFile;
-    targetVariant.packageApplication.outputFile = 
-        new File(apkProcess.parentFile, apkProcess.name.replace(targetVariant.buildType.name, versionName));
-}
-
-assembleRelease.doLast {
-    tasks.moveApk.execute()
-}
-
-task moveApk(type: Copy) {
-    description "Move the final apk in <root>/out/appname.apk"
-
-    from "$projectDir/build/apk"
-    into "$rootProject.projectDir/out"
-    include '*.apk'
+    def apkProcessNewName = apkProcess.name.replace(targetVariant.buildType.name, versionName);
+    copy {
+        from "$apkProcess"
+        into "$rootProject.projectDir/out"
+        rename ("$apkProcess.name", "$apkProcessNewName")
+    }
 }
