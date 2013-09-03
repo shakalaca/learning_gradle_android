@@ -111,3 +111,7 @@ def rename_and_moveout_apk(targetVariant) {
         rename ("$apkProcess.name", "$apkProcessNewName")
     }
 }
+
+clean.doLast {
+    project.delete "$rootProject.projectDir/out"
+}
