@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Amazon Free</string>
+    <string name="google_maps_v2_key">Here is your API KEY for Amazon Free</string>
+
+</resources>

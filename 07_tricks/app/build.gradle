@@ -24,8 +24,14 @@ android {
         amazonFree {
             packageName = 'com.corner23.android.amazon.free'
         }
+        amazonPaid {
+            packageName = 'com.corner23.android.amazon.paid'
+        }
         playFree {
             packageName = 'com.corner23.android.playstore.free'
+        }
+        playPaid {
+            packageName = 'com.corner23.android.playstore.paid'
         }
     }
 

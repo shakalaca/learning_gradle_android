@@ -23,6 +23,10 @@
             </intent-filter>
         </activity>
         <activity android:name="com.corner23.android.demo.PreferenceActivity" />
+        
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/google_maps_v2_key" />
     </application>
 
 </manifest>
