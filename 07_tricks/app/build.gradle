@@ -67,6 +67,8 @@ android {
         }
     }
 
+    // setup your extra resources here, if not defined the default debug and 
+    // release sourceSets will be used
     project.ext.amazonPaid = [
         debugRes: ['src/amazonPaidDebug/res'],
         releaseRes: ['src/amazonPaidRelease/res']
