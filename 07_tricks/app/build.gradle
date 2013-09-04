@@ -66,19 +66,32 @@ android {
             proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
+
+    project.ext.amazonPaid = [
+        debugRes: ['src/amazonPaidDebug/res'],
+        releaseRes: ['src/amazonPaidRelease/res']
+    ]
+
+    project.ext.amazonFree = [
+        debugRes: ['src/amazonFreeDebug/res'], 
+        releaseRes: ['src/amazonFreeRelease/res']
+    ]
 }
 
 android.applicationVariants.all { variant ->
     variant.mergeResources.doFirst {
-        if (variant.name.startsWith("AmazonPaid")) {
-            android.sourceSets.debug.res.srcDirs = ['src/amazonPaidDebug/res']
-            android.sourceSets.release.res.srcDirs = ['src/amazonPaidRelease/res']
-        } else if (variant.name.startsWith("AmazonFree")) {
-            android.sourceSets.debug.res.srcDirs = ['src/amazonFreeDebug/res']
-            android.sourceSets.release.res.srcDirs = ['src/amazonFreeRelease/res']
-        } else {
-            android.sourceSets.debug.res.srcDirs = ['src/debug/res']
-            android.sourceSets.release.res.srcDirs = ['src/release/res']
+        if (project.ext.has(variant.productFlavors.name)) {
+            if (project.ext[variant.productFlavors.name].debugRes != null) {
+                android.sourceSets.debug.res.srcDirs = project.ext[variant.productFlavors.name].debugRes
+            } else {
+                android.sourceSets.debug.res.srcDirs = ['src/debug/res']
+            }
+            
+            if (project.ext[variant.productFlavors.name].releaseRes != null) {
+                android.sourceSets.release.res.srcDirs = project.ext[variant.productFlavors.name].releaseRes
+            } else {
+                android.sourceSets.release.res.srcDirs = ['src/release/res']
+            }
         }
     }
 
