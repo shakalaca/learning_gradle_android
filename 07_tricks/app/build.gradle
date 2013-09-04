@@ -92,6 +92,9 @@ android.applicationVariants.all { variant ->
             } else {
                 android.sourceSets.release.res.srcDirs = ['src/release/res']
             }
+        } else {
+            android.sourceSets.debug.res.srcDirs = ['src/debug/res']
+            android.sourceSets.release.res.srcDirs = ['src/release/res']
         }
     }
 
