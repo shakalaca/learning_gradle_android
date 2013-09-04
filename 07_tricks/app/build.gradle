@@ -70,17 +70,47 @@ android {
     // setup your extra resources here, if not defined the default debug and 
     // release sourceSets will be used
     project.ext.amazonPaid = [
+        debugManifest: 'src/amazonPaidDebug/AndroidManifest.xml',
+        releaseManifest: 'src/amazonPaidRelease/AndroidManifest.xml',
         debugRes: ['src/amazonPaidDebug/res'],
         releaseRes: ['src/amazonPaidRelease/res']
     ]
 
     project.ext.amazonFree = [
+        debugManifest: 'src/amazonFreeDebug/AndroidManifest.xml',
+        releaseManifest: 'src/amazonFreeRelease/AndroidManifest.xml',
         debugRes: ['src/amazonFreeDebug/res'], 
         releaseRes: ['src/amazonFreeRelease/res']
     ]
 }
 
 android.applicationVariants.all { variant ->
+    variant.processManifest.doFirst {
+        if (project.ext.has(variant.productFlavors.name)) {
+            if (project.ext[variant.productFlavors.name].debugManifest != null &&
+                project.ext[variant.productFlavors.name].releaseManifest != null) {
+                def manifestDirectory = android.sourceSets[variant.productFlavors.name].manifest.srcFile.parentFile
+                if (variant.buildType.name.equals("debug")) {
+                    copy {
+                        from project.ext[variant.productFlavors.name].debugManifest
+                        into manifestDirectory
+                    }
+                } else if (variant.buildType.name.equals("release")) {
+                    copy {
+                        from project.ext[variant.productFlavors.name].releaseManifest
+                        into manifestDirectory
+                    }
+                }
+            }
+        }
+    }
+
+    variant.processManifest.doLast {
+        if (project.ext.has(variant.productFlavors.name)) {
+            project.delete android.sourceSets[variant.productFlavors.name].manifest.srcFile
+        }
+    }
+
     variant.mergeResources.doFirst {
         if (project.ext.has(variant.productFlavors.name)) {
             if (project.ext[variant.productFlavors.name].debugRes != null) {
