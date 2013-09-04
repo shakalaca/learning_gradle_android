@@ -19,6 +19,8 @@ android {
         packageName = 'com.corner23.android.demo'
     }
 
+    project.ext.appStartupClassName = 'com.corner23.android.demo.MainActivity'
+    
     productFlavors {
         rock
         amazonFree {
@@ -84,7 +86,7 @@ android.applicationVariants.all { variant ->
     variant.install.doLast {
         def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
         def packageName = variant.productFlavors.packageName[0] ? variant.productFlavors.packageName[0] : android.defaultConfig.packageName
-        def startupClass = packageName + packageSuffix + '/com.corner23.android.demo.MainActivity'
+        def startupClass = packageName + packageSuffix + '/' + project.ext.appStartupClassName
         def result = exec {
             executable = 'adb'
             args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
