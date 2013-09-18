@@ -4,14 +4,6 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <permission
-        android:name="com.corner23.android.amazon.free.debug.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="com.corner23.android.amazon.free.debug.permission.C2D_MESSAGE" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -20,7 +12,7 @@
 
             <meta-data
 		android:name="MobAd_CHANNEL"
-		android:value="amazon" />
-
+		android:value="play" />
     </application>    
+    
 </manifest>
