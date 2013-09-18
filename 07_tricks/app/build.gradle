@@ -184,3 +184,8 @@ def rename_and_moveout_apk(targetVariant) {
 clean.doLast {
     project.delete "$rootProject.projectDir/out"
 }
+
+def env = System.getProperties()
+if (env['com.android.studio.gradle.project.path'] != null) {
+    project.ext.buildFromAndroidStudio = true
+}
