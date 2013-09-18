@@ -1,0 +1,96 @@
+android.applicationVariants.all { variant ->
+    variant.processManifest.doFirst {
+        if (project.ext.has(variant.productFlavors.name)) {
+            if (project.ext[variant.productFlavors.name].debugManifest != null &&
+                project.ext[variant.productFlavors.name].releaseManifest != null) {
+                def manifestDirectory = android.sourceSets[variant.productFlavors.name].manifest.srcFile.parentFile
+                if (variant.buildType.name.equals("debug")) {
+                    copy {
+                        from project.ext[variant.productFlavors.name].debugManifest
+                        into manifestDirectory
+                    }
+                } else if (variant.buildType.name.equals("release")) {
+                    copy {
+                        from project.ext[variant.productFlavors.name].releaseManifest
+                        into manifestDirectory
+                    }
+                }
+            }
+        }
+    }
+
+    variant.processManifest.doLast {
+        if (project.ext.has(variant.productFlavors.name)) {
+            project.delete android.sourceSets[variant.productFlavors.name].manifest.srcFile
+        }
+    }
+
+    variant.mergeResources.doFirst {
+        if (project.ext.has(variant.productFlavors.name)) {
+            if (project.ext[variant.productFlavors.name].debugRes != null) {
+                android.sourceSets.debug.res.srcDirs = project.ext[variant.productFlavors.name].debugRes
+            } else {
+                android.sourceSets.debug.res.srcDirs = ['src/debug/res']
+            }
+            
+            if (project.ext[variant.productFlavors.name].releaseRes != null) {
+                android.sourceSets.release.res.srcDirs = project.ext[variant.productFlavors.name].releaseRes
+            } else {
+                android.sourceSets.release.res.srcDirs = ['src/release/res']
+            }
+        } else {
+            android.sourceSets.debug.res.srcDirs = ['src/debug/res']
+            android.sourceSets.release.res.srcDirs = ['src/release/res']
+        }
+    }
+
+    // launch after install
+    variant.install.doLast {
+        def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
+        def packageName = variant.productFlavors.packageName[0] ? variant.productFlavors.packageName[0] : android.defaultConfig.packageName
+        def startupClass = packageName + packageSuffix + '/' + project.ext.appStartupClassName
+        def result = exec {
+            executable = 'adb'
+            args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
+        }
+    }
+
+    variant.assemble.doLast {
+        rename_and_moveout_apk(variant)
+    }
+}
+
+def rename_and_moveout_apk(targetVariant) {
+    // get hash of current commit
+    new ByteArrayOutputStream().withStream { os -> 
+        def result = exec {
+            executable = 'git'
+            args = ['rev-parse', '--short', 'HEAD']
+            standardOutput = os
+        }
+        
+        project.ext.gitHash = os.toString().trim();
+    }
+
+    // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
+    def versionSuffix = targetVariant.buildType.versionNameSuffix ? targetVariant.buildType.versionNameSuffix : ""
+    def versionName = targetVariant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
+    
+    if (targetVariant.zipAlign) {
+        def apkFinal = targetVariant.outputFile;
+        def apkFinalNewName = apkFinal.name.replace(targetVariant.buildType.name, versionName);
+        copy {
+            from "$apkFinal"
+            into "$rootProject.projectDir/out"
+            rename ("$apkFinal.name", "$apkFinalNewName")
+        }
+    }
+
+    def apkProcess = targetVariant.packageApplication.outputFile;
+    def apkProcessNewName = apkProcess.name.replace(targetVariant.buildType.name, versionName);
+    copy {
+        from "$apkProcess"
+        into "$rootProject.projectDir/out"
+        rename ("$apkProcess.name", "$apkProcessNewName")
+    }
+}
