@@ -61,20 +61,9 @@ android.applicationVariants.all { variant ->
 }
 
 def rename_and_moveout_apk(targetVariant) {
-    // get hash of current commit
-    new ByteArrayOutputStream().withStream { os -> 
-        def result = exec {
-            executable = 'git'
-            args = ['rev-parse', '--short', 'HEAD']
-            standardOutput = os
-        }
-        
-        project.ext.gitHash = os.toString().trim();
-    }
-
     // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
     def versionSuffix = targetVariant.buildType.versionNameSuffix ? targetVariant.buildType.versionNameSuffix : ""
-    def versionName = targetVariant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
+    def versionName = targetVariant.mergedFlavor.versionName + versionSuffix;
     
     if (targetVariant.zipAlign) {
         def apkFinal = targetVariant.outputFile;

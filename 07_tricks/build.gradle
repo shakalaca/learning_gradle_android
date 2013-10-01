@@ -16,3 +16,16 @@ allprojects {
 task wrapper(type: Wrapper) {
     gradleVersion = '1.7'
 }
+
+// get hash of current commit
+def getGitHash() {
+    def os = new ByteArrayOutputStream()
+    exec {
+        executable = 'git'
+        args = ['rev-parse', '--short', 'HEAD']
+        standardOutput = os
+    }
+    
+    return "-" + os.toString().trim();
+}
+

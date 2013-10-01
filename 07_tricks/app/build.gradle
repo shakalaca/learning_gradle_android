@@ -16,7 +16,7 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 17
-        versionName '1.0.1'
+        versionName '1.0.1' + getGitHash()
         packageName = 'com.corner23.android.demo'
     }
 
