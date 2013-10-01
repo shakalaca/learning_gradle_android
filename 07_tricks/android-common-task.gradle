@@ -1,4 +1,5 @@
 android.applicationVariants.all { variant ->
+    // use build type specific manifest file {
     variant.processManifest.doFirst {
         if (project.ext.has(variant.productFlavors.name)) {
             if (project.ext[variant.productFlavors.name].debugManifest != null &&
@@ -24,6 +25,7 @@ android.applicationVariants.all { variant ->
             project.delete android.sourceSets[variant.productFlavors.name].manifest.srcFile
         }
     }
+    // use build type specific manifest file }
 
     variant.mergeResources.doFirst {
         if (project.ext.has(variant.productFlavors.name)) {
