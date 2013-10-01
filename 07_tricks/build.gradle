@@ -3,7 +3,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.6'
+        if (gradle.gradleVersion.startsWith("1.8")) {
+            classpath 'com.android.tools.build:gradle:0.6.0'
+        } else {
+            classpath 'com.android.tools.build:gradle:0.5.6'
+        }
     }
 }
 
