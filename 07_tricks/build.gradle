@@ -13,6 +13,13 @@ allprojects {
     }
 }
 
+project.ext {
+	compileSdkVersion = 19
+	buildToolsVersion = "19.1.0"
+
+	supportPackageVersion = "19.1.0"
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }

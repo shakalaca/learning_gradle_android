@@ -4,14 +4,14 @@ apply from: "$rootDir/android-common-task.gradle"
 archivesBaseName = "demo"
 
 dependencies {
-    compile 'com.android.support:support-v4:13.0.0'
+    compile "com.android.support:support-v4:${supportPackageVersion}"
     compile project(':library:ActionBarSherlock:library')
     compile project(':library:UnifiedPreference:library')
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion 8
