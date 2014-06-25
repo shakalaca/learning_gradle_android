@@ -48,8 +48,8 @@ android.applicationVariants.all { variant ->
 
     // launch after install
     variant.install.doLast {
-        def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
-        def packageName = variant.productFlavors.packageName[0] ? variant.productFlavors.packageName[0] : android.defaultConfig.packageName
+        def packageSuffix = variant.buildType.applicationIdSuffix ? variant.buildType.packageNameSuffix : ""
+        def packageName = variant.productFlavors.applicationId[0] ? variant.productFlavors.applicationId[0] : android.defaultConfig.applicationId
         def startupClass = packageName + packageSuffix + '/' + project.ext.appStartupClassName
         def result = exec {
             executable = 'adb'

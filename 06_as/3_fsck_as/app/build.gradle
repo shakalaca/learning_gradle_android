@@ -2,13 +2,13 @@ apply plugin: 'android'
 
 dependencies {
     compile 'com.android.support:support-v4:13.0.0'
-    compile project(':library:ActionBarSherlock')
-    compile project(':library:UnifiedPreference')
+    compile project(':ActionBarSherlock')
+    compile project(':UnifiedPreference')
 }
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "17.0.0"
+    buildToolsVersion "19.1.0"
 
     defaultConfig {
         minSdkVersion 8
@@ -33,12 +33,12 @@ android {
 
     buildTypes {
         debug {
-            packageNameSuffix ".debug"
+            applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
         }
 
         release {
-            packageNameSuffix ".release"
+            applicationIdSuffix ".release"
             versionNameSuffix = "-release"
             signingConfig signingConfigs.release
 
@@ -47,3 +47,4 @@ android {
         }
     }
 }
+	

@@ -26,22 +26,22 @@ archivesBaseName = "demo"
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "17.0.0"
+    buildToolsVersion "19.1.0"
 
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 17
         versionName '1.0.1'
-        packageName = 'com.corner23.android.demo'
+        applicationId = 'com.corner23.android.demo'
     }
 
     productFlavors {
         rock
         amazonFree {
-            packageName = 'com.corner23.android.amazon.free'
+            applicationId = 'com.corner23.android.amazon.free'
         }
         playFree {
-            packageName = 'com.corner23.android.playstore.free'
+            applicationId = 'com.corner23.android.playstore.free'
         }
     }
 
@@ -63,7 +63,7 @@ android {
 
     buildTypes {
         debug {
-            packageNameSuffix ".debug"
+            applicationIdSuffix ".debug"
             versionNameSuffix "-SNAPSHOT"
         }
 
@@ -76,7 +76,7 @@ android {
     }
 }
 
-android.applicationVariants.each { variant ->
+android.applicationVariants.all { variant ->
     // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
     def versionSuffix = variant.buildType.versionNameSuffix ? variant.buildType.versionNameSuffix : ""
     def versionName = variant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
@@ -87,8 +87,8 @@ android.applicationVariants.each { variant ->
 
     // launch after install
     variant.install.doLast {
-        def packageSuffix = variant.buildType.packageNameSuffix ? variant.buildType.packageNameSuffix : ""
-        def packageName = variant.productFlavors.packageName[0] ? variant.productFlavors.packageName[0] : android.defaultConfig.packageName
+        def packageSuffix = variant.buildType.applicationIdSuffix ? variant.buildType.applicationIdSuffix : ""
+        def packageName = variant.productFlavors.applicationId[0] ? variant.productFlavors.applicationId[0] : android.defaultConfig.applicationId
         def startupClass = packageName + packageSuffix + '/com.corner23.android.demo.MainActivity'
         def result = exec {
             executable = 'adb'
