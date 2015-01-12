@@ -1,32 +1,4 @@
 android.applicationVariants.all { variant ->
-    // use build type specific manifest file {
-    variant.processManifest.doFirst {
-        if (project.ext.has(variant.productFlavors.name)) {
-            if (project.ext[variant.productFlavors.name].debugManifest != null &&
-                project.ext[variant.productFlavors.name].releaseManifest != null) {
-                def manifestDirectory = android.sourceSets[variant.productFlavors.name].manifest.srcFile.parentFile
-                if (variant.buildType.name.equals("debug")) {
-                    copy {
-                        from project.ext[variant.productFlavors.name].debugManifest
-                        into manifestDirectory
-                    }
-                } else if (variant.buildType.name.equals("release")) {
-                    copy {
-                        from project.ext[variant.productFlavors.name].releaseManifest
-                        into manifestDirectory
-                    }
-                }
-            }
-        }
-    }
-
-    variant.processManifest.doLast {
-        if (project.ext.has(variant.productFlavors.name)) {
-            project.delete android.sourceSets[variant.productFlavors.name].manifest.srcFile
-        }
-    }
-    // use build type specific manifest file }
-
     variant.mergeResources.doFirst {
         if (project.ext.has(variant.productFlavors.name)) {
             if (project.ext[variant.productFlavors.name].debugRes != null) {
@@ -47,13 +19,15 @@ android.applicationVariants.all { variant ->
     }
 
     // launch after install
-    variant.install.doLast {
-        def packageSuffix = variant.buildType.applicationIdSuffix ? variant.buildType.packageNameSuffix : ""
-        def packageName = variant.productFlavors.applicationId[0] ? variant.productFlavors.applicationId[0] : android.defaultConfig.applicationId
-        def startupClass = packageName + packageSuffix + '/' + project.ext.appStartupClassName
-        def result = exec {
-            executable = 'adb'
-            args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
+    if (variant.install != null) {
+        variant.install.doLast {
+            def packageSuffix = variant.buildType.applicationIdSuffix ? variant.buildType.packageNameSuffix : ""
+            def packageName = variant.productFlavors.applicationId[0] ? variant.productFlavors.applicationId[0] : android.defaultConfig.applicationId
+            def startupClass = packageName + packageSuffix + '/' + project.ext.appStartupClassName
+            def result = exec {
+                executable = 'adb'
+                args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
+            }
         }
     }
 
@@ -67,21 +41,13 @@ def rename_and_moveout_apk(targetVariant) {
     def versionSuffix = targetVariant.buildType.versionNameSuffix ? targetVariant.buildType.versionNameSuffix : ""
     def versionName = targetVariant.mergedFlavor.versionName + versionSuffix;
     
-    if (targetVariant.zipAlign) {
-        def apkFinal = targetVariant.outputFile;
-        def apkFinalNewName = apkFinal.name.replace(targetVariant.buildType.name, versionName);
+    targetVariant.outputs.each { output->
+        def apkProcess = output.getOutputFile();
+        def apkProcessNewName = apkProcess.name.replace(targetVariant.buildType.name, versionName);
         copy {
-            from "$apkFinal"
+            from "$apkProcess"
             into "$rootProject.projectDir/out"
-            rename ("$apkFinal.name", "$apkFinalNewName")
+            rename ("$apkProcess.name", "$apkProcessNewName")
         }
-    }
-
-    def apkProcess = targetVariant.packageApplication.outputFile;
-    def apkProcessNewName = apkProcess.name.replace(targetVariant.buildType.name, versionName);
-    copy {
-        from "$apkProcess"
-        into "$rootProject.projectDir/out"
-        rename ("$apkProcess.name", "$apkProcessNewName")
     }
 }

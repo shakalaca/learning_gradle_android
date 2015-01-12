@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
     compile project(':library:ActionBarSherlock')
@@ -9,7 +9,7 @@ version = '0.0.3'
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 7

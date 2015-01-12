@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 dependencies {
     compile 'com.android.support:support-v4:13.0.0'
@@ -7,7 +7,7 @@ dependencies {
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 8
@@ -24,19 +24,7 @@ android {
     }
 
     signingConfigs {
-        release {
-            if (project.hasProperty('demoKeyAlias') && 
-                project.hasProperty('demoStoreFile') &&
-                project.hasProperty('demoStorePassword') &&
-                project.hasProperty('demoKeyPassword')) {
-                keyAlias = demoKeyAlias
-                storeFile = file(demoStoreFile)
-                storePassword = demoStorePassword
-                keyPassword = demoKeyPassword
-            } else {
-                signingConfig = null
-            }
-        }
+        release
     }
 
     buildTypes {
@@ -50,8 +38,21 @@ android {
             versionNameSuffix = "-release"
             signingConfig signingConfigs.release
 
-            runProguard true
+            minifyEnabled true
+            shrinkResources true
             proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
+}
+
+if (project.hasProperty('keyAlias') && 
+    project.hasProperty('storeFile') &&
+    project.hasProperty('storePassword') &&
+    project.hasProperty('keyPassword')) {
+    android.signingConfigs.release.keyAlias = keyAlias
+    android.signingConfigs.release.storeFile = file(storeFile)
+    android.signingConfigs.release.storePassword = storePassword
+    android.signingConfigs.release.keyPassword = keyPassword
+} else {
+    android.buildTypes.release.signingConfig = null
 }

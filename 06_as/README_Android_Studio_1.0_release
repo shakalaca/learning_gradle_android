@@ -1,0 +1,1 @@
+The final release has fixed the issue of projectDir change, thus 3_fsck_as should be shown properly in Android Stdio :)

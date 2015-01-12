@@ -1,14 +1,23 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 dependencies {
-    compile 'com.android.support:support-v4:13.0.0'
+    compile 'com.android.support:support-v4:21.0.3'
     compile project(':library:ActionBarSherlock')
     compile project(':library:UnifiedPreference')
 }
 
+def hasSigningKey = false
+
+if (project.hasProperty('demoKeyAlias') && 
+    project.hasProperty('demoStoreFile') &&
+    project.hasProperty('demoStorePassword') &&
+    project.hasProperty('demoKeyPassword')) {
+    hasSigningKey = true
+}
+
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    buildToolsVersion "21.1.1"
 
     defaultConfig {
         minSdkVersion 8
@@ -17,17 +26,22 @@ android {
 
     signingConfigs {
         release {
-            if (project.hasProperty('demoKeyAlias') && 
-                project.hasProperty('demoStoreFile') &&
-                project.hasProperty('demoStorePassword') &&
-                project.hasProperty('demoKeyPassword')) {
+            if (hasSigningKey) {
                 keyAlias = demoKeyAlias
                 storeFile = file(demoStoreFile)
                 storePassword = demoStorePassword
                 keyPassword = demoKeyPassword
-            } else {
-                signingConfig = null
             }
+        }
+    }
+
+    productFlavors {
+        full {
+            applicationId "com.corner23.android.demo.full"
+        }
+
+        demo {
+            applicationId "com.corner23.android.demo.demo"
         }
     }
 
@@ -40,9 +54,12 @@ android {
         release {
             applicationIdSuffix ".release"
             versionNameSuffix = "-release"
-            signingConfig signingConfigs.release
+            if (hasSigningKey) {
+                signingConfig = signingConfigs.release
+            }
 
-            runProguard true
+            minifyEnabled true
+            shrinkResources true
             proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }

@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 dependencies {
     compile 'com.android.support:support-v4:13.0.0'
@@ -26,7 +26,7 @@ archivesBaseName = "demo"
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.1.0"
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 8
@@ -46,19 +46,7 @@ android {
     }
 
     signingConfigs {
-        release {
-            if (project.hasProperty('demoKeyAlias') && 
-                project.hasProperty('demoStoreFile') &&
-                project.hasProperty('demoStorePassword') &&
-                project.hasProperty('demoKeyPassword')) {
-                keyAlias = demoKeyAlias
-                storeFile = file(demoStoreFile)
-                storePassword = demoStorePassword
-                keyPassword = demoKeyPassword
-            } else {
-                signingConfig = null
-            }
-        }
+        release
     }
 
     buildTypes {
@@ -70,7 +58,8 @@ android {
         release {
             signingConfig signingConfigs.release
 
-            runProguard true
+            minifyEnabled true
+            shrinkResources true
             proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
@@ -80,19 +69,36 @@ android.applicationVariants.all { variant ->
     // replace output apk name to <product>-<version>-<buildtype>-<githash>.apk
     def versionSuffix = variant.buildType.versionNameSuffix ? variant.buildType.versionNameSuffix : ""
     def versionName = variant.mergedFlavor.versionName + versionSuffix + "-${gitHash}";
-    def apk = variant.outputFile;
-    def newName = apk.name.replace(variant.buildType.name, versionName);
 
-    variant.outputFile = new File(apk.parentFile, newName);
+    variant.outputs.each { output->
+        def apk = output.getOutputFile();
+        def newName = apk.name.replace(variant.buildType.name, versionName);
+
+        output.setOutputFile(new File(apk.parentFile, newName));
+    }
 
     // launch after install
-    variant.install.doLast {
-        def packageSuffix = variant.buildType.applicationIdSuffix ? variant.buildType.applicationIdSuffix : ""
-        def packageName = variant.productFlavors.applicationId[0] ? variant.productFlavors.applicationId[0] : android.defaultConfig.applicationId
-        def startupClass = packageName + packageSuffix + '/com.corner23.android.demo.MainActivity'
-        def result = exec {
-            executable = 'adb'
-            args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
+    if (variant.install != null) {
+        variant.install.doLast {
+            def packageSuffix = variant.buildType.applicationIdSuffix ? variant.buildType.applicationIdSuffix : ""
+            def packageName = variant.productFlavors.applicationId[0] ? variant.productFlavors.applicationId[0] : android.defaultConfig.applicationId
+            def startupClass = packageName + packageSuffix + '/com.corner23.android.demo.MainActivity'
+            def result = exec {
+                executable = 'adb'
+                args = ['shell', 'am', 'start', '-c', 'android.intent.category.LAUNCHER', '-n', startupClass]
+            }
         }
     }
+}
+
+if (project.hasProperty('keyAlias') && 
+    project.hasProperty('storeFile') &&
+    project.hasProperty('storePassword') &&
+    project.hasProperty('keyPassword')) {
+    android.signingConfigs.release.keyAlias = keyAlias
+    android.signingConfigs.release.storeFile = file(storeFile)
+    android.signingConfigs.release.storePassword = storePassword
+    android.signingConfigs.release.keyPassword = keyPassword
+} else {
+    android.buildTypes.release.signingConfig = null
 }

@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 apply from: "$rootDir/android-common-task.gradle"
 
 def versionMajor = 1
@@ -45,19 +45,7 @@ android {
     }
 
     signingConfigs {
-        release {
-            if (project.hasProperty('demoKeyAlias') && 
-                project.hasProperty('demoStoreFile') &&
-                project.hasProperty('demoStorePassword') &&
-                project.hasProperty('demoKeyPassword')) {
-                keyAlias = demoKeyAlias
-                storeFile = file(demoStoreFile)
-                storePassword = demoStorePassword
-                keyPassword = demoKeyPassword
-            } else {
-                signingConfig = null
-            }
-        }
+        release
     }
 
     buildTypes {
@@ -69,8 +57,9 @@ android {
         release {
             signingConfig signingConfigs.release
 
-            runProguard true
-            proguardFile getDefaultProguardFile('proguard-android.txt')
+            minifyEnabled true
+            shrinkResources true
+            proguardFile 'proguard-android.txt'
         }
     }
 
@@ -98,4 +87,16 @@ clean.doLast {
 def env = System.getProperties()
 if (env['com.android.studio.gradle.project.path'] != null) {
     project.ext.buildFromAndroidStudio = true
+}
+
+if (project.hasProperty('keyAlias') && 
+    project.hasProperty('storeFile') &&
+    project.hasProperty('storePassword') &&
+    project.hasProperty('keyPassword')) {
+    android.signingConfigs.release.keyAlias = keyAlias
+    android.signingConfigs.release.storeFile = file(storeFile)
+    android.signingConfigs.release.storePassword = storePassword
+    android.signingConfigs.release.keyPassword = keyPassword
+} else {
+    android.buildTypes.release.signingConfig = null
 }
